@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 const SUPA_URL = "https://eimcmuzstrvlbjgimvsx.supabase.co";
-const SUPA_SECRET = "sb_secret_rinSAySb6qIY3GwmFA17GQ_I-CexNSL";
+const SUPA_SECRET = "sb_publishable_mhe6FqpyayyhNc7fVd1usw_X0RXPKlD";
 const ADMIN_PASS = "albasit2025";
 
 const O="#E8620A",OH="#FF7A1A",BK="#000000",BRM="#1E0A02",BR="#1A0800",
