@@ -86,9 +86,7 @@ function ARModal({cat,onClose}){
           <h2 style={{margin:"0 0 2px",fontSize:16,fontWeight:800,color:CR,fontFamily:"'Space Grotesk',sans-serif"}}>{cat.name}</h2>
           <p style={{margin:"0 0 10px",fontSize:10,color:CM}}>{cat.sub}</p>
           {cat.ar_url?(
-            <a href={cat.ar_url.startsWith("http")
-              ? `https://miniaturelab.com/view?model=${encodeURIComponent(cat.ar_url)}`
-              : cat.ar_url
+            <a href={cat.ar_url
             } target="_blank" rel="noreferrer" style={{display:"block",width:"100%",padding:"11px",background:`linear-gradient(135deg,${O},${OH})`,border:"none",borderRadius:10,color:"#fff",fontSize:12,fontWeight:800,textAlign:"center",textDecoration:"none",fontFamily:"'Space Grotesk',sans-serif",boxShadow:`0 0 18px ${O}66`,letterSpacing:.5,animation:"arPulse 2.4s ease-in-out infinite"}}>
               VIEW IN AR — Place on Table 📱
             </a>
