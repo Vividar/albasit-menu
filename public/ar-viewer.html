@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>Al Basit AR</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0A0300;font-family:'Segoe UI',sans-serif;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
+.header{background:linear-gradient(180deg,#1A0800,#0A0300);padding:10px 14px;border-bottom:2px solid #E8620A55;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.htitle{font-size:17px;font-weight:800;color:#F5E2C4;}
+.hsub{font-size:7px;color:#E8620A;letter-spacing:3px;font-weight:700;}
+model-viewer{width:100%;flex:1;min-height:0;background:radial-gradient(ellipse at 50% 60%,#2E1206,#0A0300);--poster-color:#0A0300;}
+.bottom{background:#0A0300;padding:12px 14px 16px;border-top:1px solid #E8620A22;flex-shrink:0;}
+.iname{font-size:18px;font-weight:800;color:#F5E2C4;}
+.isub{font-size:11px;color:#8A6644;margin:2px 0;}
+.iprice{font-size:12px;color:#E8620A;font-weight:700;margin-bottom:10px;}
+.ar-btn{width:100%;padding:14px;background:linear-gradient(135deg,#E8620A,#FF7A1A);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 0 18px #E8620A66;margin-bottom:8px;animation:glow 2s ease-in-out infinite;}
+.back{width:100%;padding:9px;background:transparent;border:1px solid #E8620A33;border-radius:10px;color:#8A6644;font-size:11px;cursor:pointer;}
+.msg{font-size:9px;color:#E8620A88;text-align:center;margin-top:6px;line-height:1.5;min-height:14px;}
+.err{display:none;width:100%;padding:10px;background:#E6394615;border:1px solid #E6394633;border-radius:10px;color:#E63946;font-size:11px;text-align:center;margin-bottom:8px;}
+#pbar{position:absolute;bottom:0;left:0;right:0;height:3px;background:#E8620A22;}
+#pfill{height:100%;background:linear-gradient(90deg,#E8620A,#FF7A1A);width:0%;transition:width .2s;}
+@keyframes glow{0%,100%{box-shadow:0 0 18px #E8620A55;}50%{box-shadow:0 0 32px #E8620A99,0 0 55px #E8620A33;}}
+</style>
+</head>
+<body>
+<div class="header">
+  <span style="font-size:24px">🍽️</span>
+  <div>
+    <div class="hsub">◈ AL BASIT ◈</div>
+    <div class="htitle">AR 3D Viewer</div>
+  </div>
+</div>
+
+<model-viewer
+  id="mv"
+  src=""
+  alt="Food AR Model"
+  ar
+  ar-modes="webxr scene-viewer quick-look"
+  ar-scale="auto"
+  camera-controls
+  touch-action="pan-y"
+  auto-rotate
+  auto-rotate-delay="500"
+  rotation-per-second="18deg"
+  shadow-intensity="1.2"
+  exposure="1.15"
+  camera-orbit="0deg 70deg 2.2m"
+>
+  <div id="pbar"><div id="pfill"></div></div>
+</model-viewer>
+
+<div class="bottom">
+  <div class="iname" id="iname">Loading...</div>
+  <div class="isub" id="isub"></div>
+  <div class="iprice" id="iprice"></div>
+  <div class="err" id="errMsg"></div>
+  <button class="ar-btn" id="arBtn" onclick="goAR()">📱 VIEW IN AR — Place on Table</button>
+  <button class="back" onclick="window.history.back()">← Back to Menu</button>
+  <div class="msg" id="msg">Loading 3D model...</div>
+</div>
+
+<script>
+const mv = document.getElementById('mv');
+const params = new URLSearchParams(window.location.search);
+
+// Get params from URL
+const modelFile = params.get('model'); // e.g. pizza.glb
+const name = params.get('name') || 'Food Item';
+const sub = params.get('sub') || '';
+const price = params.get('price') || '';
+
+// Set text
+document.getElementById('iname').textContent = name;
+document.getElementById('isub').textContent = sub;
+if(price) document.getElementById('iprice').textContent = 'from Rs. ' + price;
+
+// Set model URL — from Vercel public folder
+const BASE = 'https://albasit-menu-nnbn.vercel.app/';
+if(modelFile) {
+  mv.setAttribute('src', BASE + modelFile);
+} else {
+  document.getElementById('msg').textContent = 'No model specified';
+}
+
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isAndroid = /Android/i.test(navigator.userAgent);
+
+mv.addEventListener('progress', e => {
+  document.getElementById('pfill').style.width = (e.detail.totalProgress * 100) + '%';
+});
+
+mv.addEventListener('load', () => {
+  document.getElementById('pfill').style.width = '100%';
+  setTimeout(() => document.getElementById('pbar').style.display='none', 600);
+  if(isAndroid) {
+    document.getElementById('msg').textContent = 'Android: Tap button → Google AR → Point camera at table';
+  } else if(isIOS) {
+    document.getElementById('msg').textContent = 'iPhone: Tap button → Camera opens → Point at table!';
+  } else {
+    document.getElementById('msg').textContent = 'Open on phone for AR experience';
+  }
+});
+
+mv.addEventListener('error', () => {
+  document.getElementById('msg').textContent = '';
+  const err = document.getElementById('errMsg');
+  err.style.display = 'block';
+  err.textContent = '3D model load nahi hua. Check karo GLB file uploaded hai GitHub par.';
+});
+
+function goAR() {
+  if(isAndroid) {
+    const glbUrl = encodeURIComponent(BASE + modelFile);
+    const itemName = encodeURIComponent(name);
+    const intent = 'intent://arvr.google.com/scene-viewer/1.0?' +
+      'file=' + glbUrl +
+      '&mode=ar_preferred' +
+      '&title=' + itemName +
+      '#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;' +
+      'S.browser_fallback_url=' + encodeURIComponent('https://play.google.com/store/apps/details?id=com.google.ar.core') +
+      ';end;';
+    window.location.href = intent;
+  } else if(isIOS) {
+    if(mv.canActivateAR) {
+      mv.activateAR();
+    } else {
+      alert('Please open in Safari browser for AR on iPhone');
+    }
+  } else {
+    alert('AR works on mobile phones only.\nOpen this page on your Android or iPhone.');
+  }
+}
+</script>
+</body>
+</html>
