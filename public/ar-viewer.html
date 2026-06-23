@@ -67,24 +67,28 @@ model-viewer{width:100%;flex:1;min-height:0;background:radial-gradient(ellipse a
 const mv = document.getElementById('mv');
 const params = new URLSearchParams(window.location.search);
 
-// Get params from URL
-const modelFile = params.get('model'); // e.g. pizza.glb
+const modelParam = params.get('model') || '';
 const name = params.get('name') || 'Food Item';
 const sub = params.get('sub') || '';
 const price = params.get('price') || '';
 
-// Set text
 document.getElementById('iname').textContent = name;
 document.getElementById('isub').textContent = sub;
 if(price) document.getElementById('iprice').textContent = 'from Rs. ' + price;
 
-// Set model URL — from Vercel public folder
-const BASE = 'https://raw.githubusercontent.com/Vividar/albasit-menu/main/public/';
-if(modelFile) {
-  mv.setAttribute('src', BASE + modelFile);
+// Build correct model URL
+let modelUrl = '';
+if(modelParam.startsWith('http')) {
+  // Full URL given — use directly but convert blob to raw
+  modelUrl = modelParam
+    .replace('github.com','raw.githubusercontent.com')
+    .replace('/blob/','/');
 } else {
-  document.getElementById('msg').textContent = 'No model specified';
+  // Just filename given — build raw URL
+  modelUrl = 'https://raw.githubusercontent.com/Vividar/albasit-menu/main/public/' + modelParam;
 }
+
+mv.setAttribute('src', modelUrl);
 
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const isAndroid = /Android/i.test(navigator.userAgent);
@@ -96,42 +100,31 @@ mv.addEventListener('progress', e => {
 mv.addEventListener('load', () => {
   document.getElementById('pfill').style.width = '100%';
   setTimeout(() => document.getElementById('pbar').style.display='none', 600);
-  if(isAndroid) {
-    document.getElementById('msg').textContent = 'Android: Tap button → Google AR → Point camera at table';
-  } else if(isIOS) {
-    document.getElementById('msg').textContent = 'iPhone: Tap button → Camera opens → Point at table!';
-  } else {
-    document.getElementById('msg').textContent = 'Open on phone for AR experience';
-  }
+  if(isAndroid) document.getElementById('msg').textContent = 'Android: Tap button → Google AR → Point camera at table';
+  else if(isIOS) document.getElementById('msg').textContent = 'iPhone: Tap button → Camera opens → Point at table!';
+  else document.getElementById('msg').textContent = 'Open on phone for AR experience';
 });
 
 mv.addEventListener('error', () => {
   document.getElementById('msg').textContent = '';
   const err = document.getElementById('errMsg');
   err.style.display = 'block';
-  err.textContent = '3D model load nahi hua. Check karo GLB file uploaded hai GitHub par.';
+  err.textContent = '3D model load nahi hua. Check: ' + modelUrl;
 });
 
 function goAR() {
   if(isAndroid) {
-    const glbUrl = encodeURIComponent(BASE + modelFile);
-    const itemName = encodeURIComponent(name);
-    const intent = 'intent://arvr.google.com/scene-viewer/1.0?' +
-      'file=' + glbUrl +
-      '&mode=ar_preferred' +
-      '&title=' + itemName +
+    const glbUrl = encodeURIComponent(modelUrl);
+    const intent = 'intent://arvr.google.com/scene-viewer/1.0?file=' + glbUrl +
+      '&mode=ar_preferred&title=' + encodeURIComponent(name) +
       '#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;' +
-      'S.browser_fallback_url=' + encodeURIComponent('https://play.google.com/store/apps/details?id=com.google.ar.core') +
-      ';end;';
+      'S.browser_fallback_url=' + encodeURIComponent('https://play.google.com/store/apps/details?id=com.google.ar.core') + ';end;';
     window.location.href = intent;
   } else if(isIOS) {
-    if(mv.canActivateAR) {
-      mv.activateAR();
-    } else {
-      alert('Please open in Safari browser for AR on iPhone');
-    }
+    if(mv.canActivateAR) mv.activateAR();
+    else alert('Please open in Safari for AR on iPhone');
   } else {
-    alert('AR works on mobile phones only.\nOpen this page on your Android or iPhone.');
+    alert('AR works on mobile phones only.');
   }
 }
 </script>
