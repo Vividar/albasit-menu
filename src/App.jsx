@@ -122,6 +122,70 @@ function FireCanvas(){
   return <canvas ref={canvasRef} style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,opacity:.55}}/>;
 }
 
+
+
+
+// ═══ BACK TO TOP ═══════════════════════
+function BackToTop(){
+  const[show,setShow]=useState(false);
+  useEffect(()=>{
+    const h=()=>setShow(window.scrollY>300);
+    window.addEventListener('scroll',h);
+    return()=>window.removeEventListener('scroll',h);
+  },[]);
+  if(!show)return null;
+  return(
+    <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})}
+      style={{position:"fixed",bottom:24,left:16,zIndex:800,width:46,height:46,borderRadius:"50%",background:"linear-gradient(135deg,#FF3D00,#E8620A)",border:"none",cursor:"pointer",color:"#fff",fontSize:18,boxShadow:"0 0 16px #FF3D0077",animation:"hb 2s ease-in-out infinite",display:"flex",alignItems:"center",justifyContent:"center"}}>
+      ↑
+    </button>
+  );
+}
+
+// ═══ FLOATING CART ══════════════════════
+function FloatingCart({count,onClick}){
+  const[bounce,setBounce]=useState(false);
+  const prevCount=useRef(0);
+  useEffect(()=>{
+    if(count>prevCount.current){setBounce(true);setTimeout(()=>setBounce(false),400);}
+    prevCount.current=count;
+  },[count]);
+  if(count===0)return null;
+  return(
+    <button onClick={onClick} style={{position:"fixed",bottom:24,right:16,zIndex:800,width:58,height:58,borderRadius:"50%",background:"linear-gradient(135deg,#FF3D00,#E8620A,#FF7A1A)",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 0 20px #FF3D0088,0 0 40px #E8620A44",animation:"hb 1.2s ease-in-out infinite",transform:bounce?"scale(1.3)":"scale(1)",transition:"transform .2s"}}>
+      🛒
+      <div style={{position:"absolute",top:-4,right:-4,width:22,height:22,borderRadius:"50%",background:"#fff",color:"#FF3D00",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 8px #FF3D0066"}}>{count}</div>
+    </button>
+  );
+}
+
+// ═══ LOADING SCREEN ════════════════════
+function LoadingScreen({onDone}){
+  const[pct,setPct]=useState(0);
+  const[out,setOut]=useState(false);
+  useEffect(()=>{
+    let p=0;
+    const t=setInterval(()=>{
+      p+=Math.random()*12+4;
+      if(p>=100){p=100;clearInterval(t);setTimeout(()=>{setOut(true);setTimeout(onDone,600);},400);}
+      setPct(Math.min(100,Math.floor(p)));
+    },80);
+    return()=>clearInterval(t);
+  },[]);
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:9999,background:"#000",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",transition:"opacity .6s",opacity:out?0:1,pointerEvents:out?"none":"all"}}>
+      <style>{`@keyframes lfire{0%,100%{box-shadow:0 0 20px #FF3D0055,0 0 40px #E8620A33;}50%{box-shadow:0 0 40px #FF3D00AA,0 0 80px #E8620A66,0 0 120px #FF3D0022;}}`}</style>
+      <img src={LOGO} style={{width:90,height:90,borderRadius:"50%",border:"3px solid #FF3D0088",objectFit:"cover",marginBottom:20,animation:"lfire 2s ease-in-out infinite",boxShadow:"0 0 30px #FF3D0055"}} alt="Al Basit"/>
+      <div style={{fontSize:24,fontWeight:900,color:"#fff",fontFamily:"'Cinzel',serif",letterSpacing:4,marginBottom:4,textShadow:"0 0 20px #E8620A88"}}>AL BASIT</div>
+      <div style={{fontSize:9,color:"#E8620A",letterSpacing:5,fontFamily:"'Cinzel',serif",marginBottom:30}}>🔥 AR MENU SYSTEM 🔥</div>
+      <div style={{width:220,height:4,background:"rgba(255,255,255,.08)",borderRadius:4,overflow:"hidden",marginBottom:12}}>
+        <div style={{height:"100%",background:"linear-gradient(90deg,#FF3D00,#E8620A,#FF7A1A)",borderRadius:4,width:pct+"%",transition:"width .1s",boxShadow:"0 0 10px #FF3D00"}}/>
+      </div>
+      <div style={{fontSize:10,color:"rgba(255,255,255,.4)",fontFamily:"'Cinzel',serif",letterSpacing:3}}>{pct}% LOADING...</div>
+    </div>
+  );
+}
+
 // ═══ HERO BANNER ═══════════════════════
 function HeroBanner(){
   const[idx,setIdx]=useState(0);
@@ -456,6 +520,8 @@ export default function App(){
   const[search,setSearch]=useState("");
   const[mounted,setMounted]=useState(false);
   const[filter,setFilter]=useState("all");
+  const[showLoader,setShowLoader]=useState(true);
+  const[cartCount,setCartCount]=useState(0);
 
   useEffect(()=>{
     (async()=>{
@@ -499,6 +565,7 @@ export default function App(){
         @keyframes marquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
       `}</style>
 
+      {showLoader&&<LoadingScreen onDone={()=>setShowLoader(false)}/>}
       <FireCanvas/>
 
       {/* AR Tagline Banner */}
@@ -588,6 +655,8 @@ export default function App(){
       </div>
 
       <Footer/>
+      <FloatingCart count={cartCount} onClick={()=>alert("Cart feature coming soon!")}/>
+      <BackToTop/>
       {arCat&&<ARModal cat={arCat} onClose={()=>setArCat(null)}/>}
       {itemsCat&&<ItemsDrawer cat={itemsCat} onClose={()=>setItemsCat(null)}/>}
     </div>
