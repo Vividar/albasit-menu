@@ -62,11 +62,13 @@ async function fetchFromSupabase(table,params=""){
   return r.json();
 }
 
-const O="#E8620A",OH="#FF7A1A",FR="#FF3D00",FY="#FFD600",
-      BK="#000000",G1="#0A0100",G2="#120200",G3="#1E0400",
-      W="#FFFFFF",CR="#F5E2C4",CM="#8A6644";
+// Original dark theme - no glow, no emojis, premium clean
+const O="#E8620A",OH="#D4571A",BK="#000000",
+      G1="#0A0300",G2="#120500",G3="#1A0600",
+      CR="#F5E2C4",CM="#8A6644",CL="#B89060",
+      W="#FFFFFF";
 
-const TAG_C={"#1":"#FF4500","Top":O,"Spicy":"#E63946","New":"#06D6A0","Special":"#9B5DE5","Family":"#FFB703","Premium":"#C9940F","Sweet":"#FF69B4","Value":"#2DC653"};
+const TAG_C={"#1":"#C0392B","Top":O,"Spicy":"#C0392B","New":"#1A6B3A","Special":"#6B3A8B","Family":"#8B6914","Premium":"#8B5A14","Sweet":"#A03560","Value":O};
 
 const Icons={
   facebook:<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>,
@@ -75,10 +77,8 @@ const Icons={
   youtube:<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>,
 };
 
-// All 22 category names for filter pills
-const ALL_CATS_NAMES=["Popular Items","Deals","Starters","Broast","Burgers","Shawarma","Sandwiches","Chinese","Pizza","Signature Flavours","Pizza Pasta & Sandwich","Matka Biryani","Appetizers","Rolls","BBQ","Karahi","Platters","Handi","Traditional","Others","Drinks","Dessert"];
+const ALL_CATS=["Popular Items","Deals","Starters","Broast","Burgers","Shawarma","Sandwiches","Chinese","Pizza","Signature Flavours","Pizza Pasta & Sandwich","Matka Biryani","Appetizers","Rolls","BBQ","Karahi","Platters","Handi","Traditional","Others","Drinks","Dessert"];
 
-// Banner slides - all food images by img_index
 const BANNER_SLIDES=[
   {img_index:16,name:"Karahi",sub:"16 Varieties of Rich Karahi"},
   {img_index:4,name:"Burgers",sub:"Crispy Zinger & Jumbo Burgers"},
@@ -86,166 +86,56 @@ const BANNER_SLIDES=[
   {img_index:14,name:"Rolls",sub:"Chicken & Beef Rolls"},
   {img_index:17,name:"Platters",sub:"BBQ for 2-6 Persons"},
   {img_index:12,name:"Matka Biryani",sub:"Clay Pot Dum Biryani"},
-  {img_index:7,name:"Chinese",sub:"Starters · Mains · Rice"},
+  {img_index:7,name:"Chinese",sub:"Starters, Mains & Rice"},
   {img_index:18,name:"Handi",sub:"Slow Cooked Handi"},
 ];
 
-// ═══ FIRE CANVAS ═══════════════════════
-function FireCanvas(){
-  const canvasRef=useRef();
-  useEffect(()=>{
-    const canvas=canvasRef.current;if(!canvas)return;
-    const ctx=canvas.getContext('2d');
-    let W=canvas.width=window.innerWidth;
-    let H=canvas.height=window.innerHeight;
-    window.addEventListener('resize',()=>{W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;});
-    const COLORS=['#FF3D00','#FF6D00','#FF9100','#FFD600','#E8620A','#FF7A1A','#FF4500'];
-    class P{
-      reset(){this.x=Math.random()*W;this.y=H+20;this.vx=(Math.random()-.5)*1.2;this.vy=-(Math.random()*3+1.5);this.life=1;this.decay=Math.random()*.007+.004;this.size=Math.random()*16+4;this.color=COLORS[Math.floor(Math.random()*COLORS.length)];this.wobble=Math.random()*Math.PI*2;this.ws=Math.random()*.08+.02;}
-      constructor(){this.reset();this.y=Math.random()*H;this.life=Math.random();}
-      update(){this.wobble+=this.ws;this.x+=this.vx+Math.sin(this.wobble)*.8;this.y+=this.vy;this.size*=.993;this.life-=this.decay;if(this.life<=0||this.y<-20)this.reset();}
-      draw(){ctx.save();ctx.globalAlpha=this.life*.3;const g=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.size);g.addColorStop(0,'rgba(255,255,255,.9)');g.addColorStop(.3,this.color);g.addColorStop(1,'transparent');ctx.fillStyle=g;ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();ctx.restore();}
-    }
-    class E{
-      reset(){this.x=Math.random()*W;this.y=H+10;this.vx=(Math.random()-.5)*2;this.vy=-(Math.random()*5+3);this.life=1;this.decay=Math.random()*.006+.003;this.size=Math.random()*2.5+.5;this.color=Math.random()>.5?'#FFD600':'#FF6D00';}
-      constructor(){this.reset();this.y=Math.random()*H;this.life=Math.random();}
-      update(){this.x+=this.vx+(Math.random()-.5)*.5;this.y+=this.vy;this.vy+=.025;this.life-=this.decay;if(this.life<=0||this.y<-10)this.reset();}
-      draw(){ctx.save();ctx.globalAlpha=this.life*.85;ctx.fillStyle=this.color;ctx.shadowBlur=8;ctx.shadowColor=this.color;ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fill();ctx.restore();}
-    }
-    const ps=[...Array(90)].map(()=>new P());
-    const es=[...Array(50)].map(()=>new E());
-    let id;
-    const go=()=>{ctx.clearRect(0,0,W,H);[...ps,...es].forEach(p=>{p.update();p.draw();});id=requestAnimationFrame(go);};
-    go();
-    return()=>cancelAnimationFrame(id);
-  },[]);
-  return <canvas ref={canvasRef} style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,opacity:.55}}/>;
-}
-
-
-
-
-// ═══ BACK TO TOP ═══════════════════════
-function BackToTop(){
-  const[show,setShow]=useState(false);
-  useEffect(()=>{
-    const h=()=>setShow(window.scrollY>300);
-    window.addEventListener('scroll',h);
-    return()=>window.removeEventListener('scroll',h);
-  },[]);
-  if(!show)return null;
-  return(
-    <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})}
-      style={{position:"fixed",bottom:24,left:16,zIndex:800,width:46,height:46,borderRadius:"50%",background:"linear-gradient(135deg,#FF3D00,#E8620A)",border:"none",cursor:"pointer",color:"#fff",fontSize:18,boxShadow:"0 0 16px #FF3D0077",animation:"hb 2s ease-in-out infinite",display:"flex",alignItems:"center",justifyContent:"center"}}>
-      ↑
-    </button>
-  );
-}
-
-// ═══ FLOATING CART ══════════════════════
-function FloatingCart({count,onClick}){
-  const[bounce,setBounce]=useState(false);
-  const prevCount=useRef(0);
-  useEffect(()=>{
-    if(count>prevCount.current){setBounce(true);setTimeout(()=>setBounce(false),400);}
-    prevCount.current=count;
-  },[count]);
-  if(count===0)return null;
-  return(
-    <button onClick={onClick} style={{position:"fixed",bottom:24,right:16,zIndex:800,width:58,height:58,borderRadius:"50%",background:"linear-gradient(135deg,#FF3D00,#E8620A,#FF7A1A)",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:"0 0 20px #FF3D0088,0 0 40px #E8620A44",animation:"hb 1.2s ease-in-out infinite",transform:bounce?"scale(1.3)":"scale(1)",transition:"transform .2s"}}>
-      🛒
-      <div style={{position:"absolute",top:-4,right:-4,width:22,height:22,borderRadius:"50%",background:"#fff",color:"#FF3D00",fontSize:11,fontWeight:800,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 8px #FF3D0066"}}>{count}</div>
-    </button>
-  );
-}
-
-// ═══ LOADING SCREEN ════════════════════
-function LoadingScreen({onDone}){
-  const[pct,setPct]=useState(0);
-  const[out,setOut]=useState(false);
-  useEffect(()=>{
-    let p=0;
-    const t=setInterval(()=>{
-      p+=Math.random()*12+4;
-      if(p>=100){p=100;clearInterval(t);setTimeout(()=>{setOut(true);setTimeout(onDone,600);},400);}
-      setPct(Math.min(100,Math.floor(p)));
-    },80);
-    return()=>clearInterval(t);
-  },[]);
-  return(
-    <div style={{position:"fixed",inset:0,zIndex:9999,background:"#000",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",transition:"opacity .6s",opacity:out?0:1,pointerEvents:out?"none":"all"}}>
-      <style>{`@keyframes lfire{0%,100%{box-shadow:0 0 20px #FF3D0055,0 0 40px #E8620A33;}50%{box-shadow:0 0 40px #FF3D00AA,0 0 80px #E8620A66,0 0 120px #FF3D0022;}}`}</style>
-      <img src={LOGO} style={{width:90,height:90,borderRadius:"50%",border:"3px solid #FF3D0088",objectFit:"cover",marginBottom:20,animation:"lfire 2s ease-in-out infinite",boxShadow:"0 0 30px #FF3D0055"}} alt="Al Basit"/>
-      <div style={{fontSize:24,fontWeight:900,color:"#fff",fontFamily:"'Cinzel',serif",letterSpacing:4,marginBottom:4,textShadow:"0 0 20px #E8620A88"}}>AL BASIT</div>
-      <div style={{fontSize:9,color:"#E8620A",letterSpacing:5,fontFamily:"'Cinzel',serif",marginBottom:30}}>🔥 AR MENU SYSTEM 🔥</div>
-      <div style={{width:220,height:4,background:"rgba(255,255,255,.08)",borderRadius:4,overflow:"hidden",marginBottom:12}}>
-        <div style={{height:"100%",background:"linear-gradient(90deg,#FF3D00,#E8620A,#FF7A1A)",borderRadius:4,width:pct+"%",transition:"width .1s",boxShadow:"0 0 10px #FF3D00"}}/>
-      </div>
-      <div style={{fontSize:10,color:"rgba(255,255,255,.4)",fontFamily:"'Cinzel',serif",letterSpacing:3}}>{pct}% LOADING...</div>
-    </div>
-  );
-}
-
-// ═══ HERO BANNER ═══════════════════════
+// ═══ BANNER ═════════════════════════════
 function HeroBanner(){
   const[idx,setIdx]=useState(0);
   const[out,setOut]=useState(false);
-  const total=BANNER_SLIDES.length;
-  
   useEffect(()=>{
-    const t=setInterval(()=>{
-      setOut(true);
-      setTimeout(()=>{setIdx(p=>(p+1)%total);setOut(false);},380);
-    },4000);
+    const t=setInterval(()=>{setOut(true);setTimeout(()=>{setIdx(p=>(p+1)%BANNER_SLIDES.length);setOut(false);},350);},4000);
     return()=>clearInterval(t);
-  },[total]);
-
+  },[]);
   const cur=BANNER_SLIDES[idx];
-  const prv=BANNER_SLIDES[(idx-1+total)%total];
-  const nxt=BANNER_SLIDES[(idx+1)%total];
-
+  const prv=BANNER_SLIDES[(idx-1+BANNER_SLIDES.length)%BANNER_SLIDES.length];
+  const nxt=BANNER_SLIDES[(idx+1)%BANNER_SLIDES.length];
   return(
-    <div style={{position:"relative",height:320,overflow:"hidden",background:`radial-gradient(ellipse at 50% 100%,${FR}22 0%,${O}11 35%,${G3} 55%,${G1} 100%)`}}>
-      {/* Grid floor */}
-      <div style={{position:"absolute",bottom:0,left:0,right:0,height:160,backgroundImage:`linear-gradient(${O}14 1px,transparent 1px),linear-gradient(90deg,${O}14 1px,transparent 1px)`,backgroundSize:"32px 32px",maskImage:"linear-gradient(to top,rgba(0,0,0,.5) 0%,transparent 100%)",WebkitMaskImage:"linear-gradient(to top,rgba(0,0,0,.5) 0%,transparent 100%)",transform:"perspective(200px) rotateX(50deg)",transformOrigin:"bottom"}}/>
-      {/* Top line glow */}
-      <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${FR}88,${FY},${O},${FY},${FR}88,transparent)`,animation:"fireBase 2s ease-in-out infinite alternate"}}/>
+    <div style={{position:"relative",height:280,overflow:"hidden",background:`linear-gradient(160deg,${G3},${G2},${G1})`}}>
+      {/* Subtle texture - no glow */}
+      <div style={{position:"absolute",inset:0,opacity:.03,backgroundImage:`linear-gradient(${O}FF 1px,transparent 1px),linear-gradient(90deg,${O}FF 1px,transparent 1px)`,backgroundSize:"40px 40px"}}/>
+      <div style={{position:"absolute",bottom:0,left:0,right:0,height:1,background:`linear-gradient(90deg,transparent,${O}44,transparent)`}}/>
 
       {/* Side cards */}
-      <div style={{position:"absolute",left:8,top:"50%",transform:"translateY(-58%) perspective(600px) rotateY(32deg) scale(.6)",opacity:.4,zIndex:2,transition:"all .4s",pointerEvents:"none"}}>
-        <div style={{width:120,height:120,borderRadius:18,overflow:"hidden",border:`1.5px solid ${O}44`,boxShadow:`-6px 0 20px ${FR}22`}}>
-          <img src={CI[prv.img_index]} style={{width:"100%",height:"100%",objectFit:"cover"}} alt=""/>
+      <div style={{position:"absolute",left:10,top:"50%",transform:"translateY(-55%) scale(.58) perspective(500px) rotateY(22deg)",opacity:.35,zIndex:2,pointerEvents:"none"}}>
+        <div style={{width:115,height:115,borderRadius:14,overflow:"hidden",border:`1.5px solid ${O}33`,background:G2}}>
+          <img src={CI[prv.img_index]} style={{width:"100%",height:"100%",objectFit:"contain",background:G2}} alt=""/>
         </div>
       </div>
-      <div style={{position:"absolute",right:8,top:"50%",transform:"translateY(-58%) perspective(600px) rotateY(-32deg) scale(.6)",opacity:.4,zIndex:2,transition:"all .4s",pointerEvents:"none"}}>
-        <div style={{width:120,height:120,borderRadius:18,overflow:"hidden",border:`1.5px solid ${O}44`,boxShadow:`6px 0 20px ${FR}22`}}>
-          <img src={CI[nxt.img_index]} style={{width:"100%",height:"100%",objectFit:"cover"}} alt=""/>
+      <div style={{position:"absolute",right:10,top:"50%",transform:"translateY(-55%) scale(.58) perspective(500px) rotateY(-22deg)",opacity:.35,zIndex:2,pointerEvents:"none"}}>
+        <div style={{width:115,height:115,borderRadius:14,overflow:"hidden",border:`1.5px solid ${O}33`,background:G2}}>
+          <img src={CI[nxt.img_index]} style={{width:"100%",height:"100%",objectFit:"contain",background:G2}} alt=""/>
         </div>
       </div>
 
-      {/* Main feature */}
-      <div style={{position:"absolute",left:"50%",top:"42%",transform:`translateX(-50%) translateY(-50%) ${out?"rotateY(90deg) scale(.7)":"rotateY(0deg) scale(1)"}`,transition:"all .38s cubic-bezier(.4,0,.2,1)",zIndex:3}}>
-        {/* Fire ring */}
-        <div style={{position:"absolute",inset:-14,borderRadius:"50%",background:`conic-gradient(${FR}CC,${O}99,${FY}CC,${OH}99,${FR}CC)`,filter:"blur(12px)",opacity:.75,animation:"spinRing 4s linear infinite"}}/>
-        {/* Card */}
-        <div style={{width:175,height:175,borderRadius:24,overflow:"hidden",border:`2.5px solid ${FY}88`,boxShadow:`0 0 30px ${FR}77,0 0 60px ${O}44,0 0 100px ${FR}22,inset 0 0 20px rgba(255,150,0,.06)`,position:"relative",background:BK}}>
-          <img src={CI[cur.img_index]} style={{width:"100%",height:"100%",objectFit:"contain",objectPosition:"center",display:"block"}} alt={cur.name}/>
-          <div style={{position:"absolute",inset:0,background:`linear-gradient(135deg,rgba(255,255,255,.08),transparent 55%,rgba(255,61,0,.1) 100%)`}}/>
-          <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent)",animation:"sweep 2.8s ease-in-out infinite"}}/>
+      {/* Main image - no glow ring */}
+      <div style={{position:"absolute",left:"50%",top:"44%",transform:`translateX(-50%) translateY(-50%) ${out?"scale(.82) rotateY(90deg)":"scale(1) rotateY(0)"}`,transition:"all .35s ease",zIndex:3}}>
+        <div style={{width:175,height:175,borderRadius:20,overflow:"hidden",border:`2px solid ${O}55`,background:G2,position:"relative"}}>
+          <img src={CI[cur.img_index]} style={{width:"100%",height:"100%",objectFit:"contain",objectPosition:"center"}} alt={cur.name}/>
+          <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,rgba(255,255,255,.04),transparent 55%)"}}/>
         </div>
-        {/* Ground shadow */}
-        <div style={{position:"absolute",bottom:-12,left:"5%",right:"5%",height:18,background:`radial-gradient(${FR}55,transparent 70%)`,filter:"blur(8px)",borderRadius:"50%"}}/>
+        <div style={{position:"absolute",bottom:-8,left:"12%",right:"12%",height:12,background:"rgba(0,0,0,.3)",filter:"blur(6px)",borderRadius:"50%"}}/>
       </div>
 
-      {/* Text */}
-      <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"10px 16px 14px",background:`linear-gradient(to top,${BK}F0,${BK}88,transparent)`,textAlign:"center",zIndex:4}}>
-        <div style={{fontSize:8,color:O,letterSpacing:4,fontFamily:"'Cinzel',serif",fontWeight:700,marginBottom:3,textShadow:"none"}}>{cur.sub}</div>
-        <div style={{fontSize:22,fontWeight:800,color:W,fontFamily:"'Cinzel',serif",textShadow:`0 0 25px ${O}AA,0 2px 6px #000`}}>{cur.name}</div>
-        {/* Dots */}
+      {/* Text - clean no glow */}
+      <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"10px 16px 14px",background:`linear-gradient(to top,${BK}EE,transparent)`,textAlign:"center",zIndex:4}}>
+        <div style={{fontSize:8,color:CL,letterSpacing:4,fontFamily:"'Cinzel',serif",marginBottom:3}}>{cur.sub}</div>
+        <div style={{fontSize:20,fontWeight:700,color:CR,fontFamily:"'Cinzel',serif"}}>{cur.name}</div>
         <div style={{display:"flex",justifyContent:"center",gap:6,marginTop:8}}>
           {BANNER_SLIDES.map((_,i)=>(
             <div key={i} onClick={()=>{setOut(true);setTimeout(()=>{setIdx(i);setOut(false);},300);}}
-              style={{width:i===idx?24:6,height:6,borderRadius:3,background:i===idx?`linear-gradient(90deg,${FR},${FY})`:`${O}33`,transition:"all .3s",cursor:"pointer",boxShadow:i===idx?`0 0 8px ${O}`:"none"}}/>
+              style={{width:i===idx?22:6,height:5,borderRadius:3,background:i===idx?O:`${O}33`,transition:"all .3s",cursor:"pointer"}}/>
           ))}
         </div>
       </div>
@@ -253,62 +143,62 @@ function HeroBanner(){
   );
 }
 
-// ═══ AR MODAL ══════════════════════════
+// ═══ AR MODAL ═══════════════════════════
 function ARModal({cat,onClose}){
   const[t,setT]=useState(0);const raf=useRef();
   useEffect(()=>{let x=0;const r=()=>{x++;setT(x);raf.current=requestAnimationFrame(r);};raf.current=requestAnimationFrame(r);return()=>cancelAnimationFrame(raf.current);},[]);
-  const ang=t*.65,sc=.97+Math.sin(t*.032)*.03;
+  const ang=t*.5,sc=.97+Math.sin(t*.028)*.03;
   return(
-    <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:4000,background:"rgba(0,0,0,.96)",backdropFilter:"blur(20px)",display:"flex",alignItems:"center",justifyContent:"center",padding:14}}>
-      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"min(420px,94vw)",background:`linear-gradient(155deg,${G3},${BK})`,border:`1.5px solid ${O}77`,borderRadius:24,overflow:"hidden",boxShadow:`0 0 60px ${FR}44,0 0 120px ${O}22,0 40px 80px #000F`}}>
-        <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:20,overflow:"hidden"}}>
-          <div style={{position:"absolute",left:0,right:0,height:"2px",background:`linear-gradient(transparent,${FY}88,transparent)`,animation:"scanH 2s linear infinite"}}/>
-        </div>
+    <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:4000,background:"rgba(0,0,0,.88)",backdropFilter:"blur(16px)",display:"flex",alignItems:"center",justifyContent:"center",padding:14}}>
+      <div onClick={e=>e.stopPropagation()} style={{position:"relative",width:"min(420px,94vw)",background:G2,border:`1.5px solid ${O}44`,borderRadius:20,overflow:"hidden",boxShadow:"0 20px 50px rgba(0,0,0,.6)"}}>
+        {/* Corner brackets only - no glow */}
         {[[0,0],[0,1],[1,0],[1,1]].map(([r,c],i)=>(
-          <div key={i} style={{position:"absolute",zIndex:21,width:16,height:16,...(r?{bottom:10}:{top:10}),...(c?{right:10}:{left:10}),borderTop:r?"none":`2px solid ${FY}`,borderBottom:r?`2px solid ${FY}`:"none",borderLeft:c?"none":`2px solid ${FY}`,borderRight:c?`2px solid ${FY}`:"none"}}/>
+          <div key={i} style={{position:"absolute",zIndex:10,width:14,height:14,...(r?{bottom:10}:{top:10}),...(c?{right:10}:{left:10}),borderTop:r?"none":`1.5px solid ${O}88`,borderBottom:r?`1.5px solid ${O}88`:"none",borderLeft:c?"none":`1.5px solid ${O}88`,borderRight:c?`1.5px solid ${O}88`:"none"}}/>
         ))}
-        <div style={{padding:"13px 15px 9px",borderBottom:`1px solid ${O}2E`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{padding:"13px 15px 10px",borderBottom:`1px solid ${O}1E`,display:"flex",justifyContent:"space-between",alignItems:"center",background:G3}}>
           <div>
-            <div style={{fontSize:7,color:O,letterSpacing:4,fontFamily:"'Cinzel',serif",fontWeight:700}}>◈ AUGMENTED REALITY ◈</div>
-            <div style={{fontSize:16,fontWeight:800,color:W,fontFamily:"'Cinzel',serif"}}>{cat.name.toUpperCase()}</div>
+            <div style={{fontSize:7,color:CL,letterSpacing:4,fontFamily:"'Cinzel',serif"}}>AUGMENTED REALITY</div>
+            <div style={{fontSize:16,fontWeight:700,color:CR,fontFamily:"'Cinzel',serif"}}>{cat.name.toUpperCase()}</div>
           </div>
-          <button onClick={onClose} style={{background:`${FR}22`,border:`1px solid ${O}55`,color:W,width:28,height:28,borderRadius:"50%",cursor:"pointer",fontSize:12}}>✕</button>
+          <button onClick={onClose} style={{background:`${O}18`,border:`1px solid ${O}44`,color:CR,width:28,height:28,borderRadius:"50%",cursor:"pointer",fontSize:12}}>✕</button>
         </div>
-        <div style={{position:"relative",height:220,background:`radial-gradient(ellipse at 50% 70%,${FR}18,${G3},${BK})`,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-          {[65,95,125].map((r,i)=>(
-            <div key={i} style={{position:"absolute",width:r*2,height:r*.6,borderRadius:"50%",border:`1px solid ${O}${["55","33","18"][i]}`,transform:`rotateX(76deg) rotateZ(${ang*(i%2?-.3:.4)*(i+1)*.4}deg)`,pointerEvents:"none"}}/>
+        <div style={{position:"relative",height:210,background:G1,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+          {/* Subtle rings - no glow */}
+          {[55,80,105].map((r,i)=>(
+            <div key={i} style={{position:"absolute",width:r*2,height:r*.55,borderRadius:"50%",border:`1px solid ${O}${["22","16","0C"][i]}`,transform:`rotateX(75deg) rotateZ(${ang*(i%2?-.25:.35)*(i+1)*.4}deg)`}}/>
           ))}
-          <div style={{position:"absolute",width:140,height:140,background:`radial-gradient(circle,${FR}44,${O}22,transparent 65%)`,borderRadius:"50%",filter:"blur(22px)",transform:`scale(${sc})`}}/>
-          <div style={{position:"relative",zIndex:5,width:165,height:165,borderRadius:20,overflow:"hidden",border:`2.5px solid ${FY}66`,transform:`perspective(500px) rotateY(${Math.sin(ang*.016)*18}deg) scale(${sc})`,boxShadow:`0 0 35px ${FR}66,0 0 70px ${O}33,0 14px 40px #000B`,background:BK}}>
+          <div style={{position:"relative",zIndex:3,width:160,height:160,borderRadius:16,overflow:"hidden",border:`1.5px solid ${O}44`,transform:`perspective(400px) rotateY(${Math.sin(ang*.014)*12}deg) scale(${sc})`,background:G2}}>
             <img src={CI[cat.img_index]} alt={cat.name} style={{width:"100%",height:"100%",objectFit:"contain",objectPosition:"center"}}/>
           </div>
-          <div style={{position:"absolute",top:10,left:10,background:"rgba(0,0,0,.88)",border:`1px solid ${FY}44`,borderRadius:8,padding:"4px 9px"}}>
-            <div style={{fontSize:6,color:O,letterSpacing:2,fontWeight:700}}>FROM</div>
-            <div style={{fontSize:14,fontWeight:800,color:O,fontFamily:"'Cinzel',serif"}}>Rs.{cat.min_price||0}</div>
+          <div style={{position:"absolute",top:10,left:10,background:"rgba(0,0,0,.7)",border:`1px solid ${O}33`,borderRadius:8,padding:"4px 9px"}}>
+            <div style={{fontSize:6,color:CL,letterSpacing:2}}>FROM</div>
+            <div style={{fontSize:13,fontWeight:700,color:O,fontFamily:"'Cinzel',serif"}}>Rs.{cat.min_price||0}</div>
           </div>
         </div>
-        <div style={{padding:"11px 15px 14px"}}>
-          <h2 style={{margin:"0 0 2px",fontSize:16,fontWeight:800,color:W,fontFamily:"'Cinzel',serif"}}>{cat.name}</h2>
-          <p style={{margin:"0 0 10px",fontSize:10,color:CM}}>{cat.sub}</p>
+        <div style={{padding:"12px 15px 14px",background:G2}}>
+          <h2 style={{margin:"0 0 2px",fontSize:16,fontWeight:700,color:CR,fontFamily:"'Cinzel',serif"}}>{cat.name}</h2>
+          <p style={{margin:"0 0 11px",fontSize:10,color:CM}}>{cat.sub}</p>
           {cat.ar_url?(
             <a href={`/ar-viewer.html?model=${encodeURIComponent(cat.ar_url)}&name=${encodeURIComponent(cat.name)}&sub=${encodeURIComponent(cat.sub||"")}&price=${cat.min_price||""}`}
               target="_blank" rel="noreferrer"
-              style={{display:"block",width:"100%",padding:"12px",background:`linear-gradient(135deg,${FR},${O},${OH})`,border:"none",borderRadius:11,color:W,fontSize:12,fontWeight:800,textAlign:"center",textDecoration:"none",fontFamily:"'Space Grotesk',sans-serif",boxShadow:`0 0 25px ${FR}66,0 0 50px ${O}33`,letterSpacing:.5,animation:"firePulse 2s infinite"}}>
+              style={{display:"block",width:"100%",padding:"12px",background:`linear-gradient(135deg,${O},${OH})`,border:"none",borderRadius:10,color:W,fontSize:12,fontWeight:700,textAlign:"center",textDecoration:"none",fontFamily:"'Cinzel',serif",letterSpacing:.8,transition:"opacity .2s"}}
+              onMouseEnter={e=>e.currentTarget.style.opacity=".88"}
+              onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
               VIEW IN AR — Place on Table
             </a>
           ):(
-            <div style={{background:`${O}08`,border:`1px solid ${O}18`,borderRadius:10,padding:10,textAlign:"center"}}>
+            <div style={{background:`${O}0A`,border:`1px solid ${O}18`,borderRadius:10,padding:10,textAlign:"center"}}>
               <div style={{fontSize:10,color:CM}}>AR model coming soon</div>
             </div>
           )}
-          <div style={{fontSize:7,color:`${CM}44`,textAlign:"center",marginTop:8,letterSpacing:2,fontFamily:"'Cinzel',serif"}}>TAP ANYWHERE TO CLOSE</div>
+          <div style={{fontSize:7,color:`${CM}55`,textAlign:"center",marginTop:9,letterSpacing:2,fontFamily:"'Cinzel',serif"}}>TAP ANYWHERE TO CLOSE</div>
         </div>
       </div>
     </div>
   );
 }
 
-// ═══ ITEMS DRAWER ══════════════════════
+// ═══ ITEMS DRAWER ═══════════════════════
 function ItemsDrawer({cat,onClose}){
   const[items,setItems]=useState([]);const[loading,setLoading]=useState(true);const[sel,setSel]=useState({});const[cart,setCart]=useState({});
   useEffect(()=>{(async()=>{setLoading(true);const d=await fetchFromSupabase('items',`?category_slug=eq.${cat.slug}&is_active=eq.true&order=sort_order.asc&select=*,item_options(*)`);setItems(d||[]);setLoading(false);})();},[cat.slug]);
@@ -319,19 +209,19 @@ function ItemsDrawer({cat,onClose}){
   const ItemRow=({item})=>{
     const opts=item.item_options||[];const oi=getOi(item.id);const ch=opts[oi]||opts[0]||{};const k=`${item.id}|${ch.size_label}`;
     return(
-      <div style={{marginBottom:7,background:cart[k]?`linear-gradient(90deg,${FR}14,${O}08,transparent)`:"rgba(255,255,255,.025)",border:`1px solid ${cart[k]?O+"55":"rgba(255,255,255,.07)"}`,borderRadius:12,overflow:"hidden",transition:"all .18s"}}>
+      <div style={{marginBottom:7,background:cart[k]?`${O}0E`:`${G2}`,border:`1px solid ${cart[k]?O+"33":O+"12"}`,borderRadius:11,overflow:"hidden",transition:"border-color .18s"}}>
         <div style={{padding:"9px 12px 8px",display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:8}}>
           <div style={{flex:1,minWidth:0}}>
-            <div style={{display:"flex",alignItems:"center",gap:5,flexWrap:"wrap",marginBottom:4}}>
-              <span style={{fontSize:12,fontWeight:600,color:W,fontFamily:"'Space Grotesk',sans-serif"}}>{item.name}</span>
-              {item.tag&&<span style={{background:TAG_C[item.tag]||O,color:W,fontSize:7,fontWeight:700,padding:"1px 5px",borderRadius:20}}>{item.tag}</span>}
+            <div style={{display:"flex",alignItems:"center",gap:5,flexWrap:"wrap",marginBottom:3}}>
+              <span style={{fontSize:12,fontWeight:600,color:CR,fontFamily:"'Space Grotesk',sans-serif"}}>{item.name}</span>
+              {item.tag&&<span style={{background:TAG_C[item.tag]||O,color:W,fontSize:7,fontWeight:700,padding:"1px 6px",borderRadius:20}}>{item.tag}</span>}
             </div>
-            {item.description&&<div style={{fontSize:9,color:CM,marginBottom:5,lineHeight:1.4}}>{item.description}</div>}
+            {item.description&&<div style={{fontSize:9,color:CM,marginBottom:4,lineHeight:1.4}}>{item.description}</div>}
             {opts.length>1&&(
-              <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+              <div style={{display:"flex",flexWrap:"wrap",gap:3}}>
                 {opts.sort((a,b)=>a.sort_order-b.sort_order).map((opt,oi2)=>(
                   <button key={oi2} onClick={()=>setSel(p=>({...p,[item.id]:oi2}))}
-                    style={{padding:"3px 9px",borderRadius:20,fontSize:9,fontWeight:600,cursor:"pointer",fontFamily:"'Space Grotesk',sans-serif",transition:"all .12s",background:oi2===oi?`linear-gradient(135deg,${FR},${O})`:"rgba(255,255,255,.07)",border:`1px solid ${oi2===oi?O+"99":"rgba(255,255,255,.1)"}`,color:oi2===oi?W:CM}}>
+                    style={{padding:"2px 9px",borderRadius:20,fontSize:9,fontWeight:600,cursor:"pointer",fontFamily:"'Space Grotesk',sans-serif",transition:"all .12s",background:oi2===oi?O:`${O}12`,border:`1px solid ${oi2===oi?O+"99":O+"26"}`,color:oi2===oi?W:CM}}>
                     {opt.size_label}
                   </button>
                 ))}
@@ -339,46 +229,41 @@ function ItemsDrawer({cat,onClose}){
             )}
           </div>
           <div style={{flexShrink:0,textAlign:"right"}}>
-            <div style={{fontSize:13,fontWeight:800,color:O,fontFamily:"'Space Grotesk',sans-serif"}}>Rs.{(ch.price||0).toLocaleString()}</div>
+            <div style={{fontSize:13,fontWeight:700,color:O,fontFamily:"'Space Grotesk',sans-serif"}}>Rs.{(ch.price||0).toLocaleString()}</div>
             {opts.length===1&&<div style={{fontSize:8,color:CM,marginBottom:2}}>{ch.size_label}</div>}
-            <button onClick={()=>add(item)} style={{marginTop:4,background:cart[k]?`linear-gradient(135deg,${FR},${O})`:`${O}18`,border:`1px solid ${O}55`,color:cart[k]?W:O,width:28,height:28,borderRadius:"50%",fontSize:13,cursor:"pointer",fontWeight:700,transition:"all .18s",boxShadow:cart[k]?`0 0 14px ${FR}88`:"none"}}>
-              {cart[k]||"+"}
-            </button>
+            <button onClick={()=>add(item)} style={{marginTop:3,background:cart[k]?O:`${O}14`,border:`1px solid ${O}44`,color:cart[k]?W:O,width:27,height:27,borderRadius:"50%",fontSize:12,cursor:"pointer",fontWeight:700,transition:"all .18s"}}>{cart[k]||"+"}</button>
           </div>
         </div>
       </div>
     );
   };
   return(
-    <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:3000,background:"rgba(0,0,0,.92)",backdropFilter:"blur(14px)"}}>
-      <div onClick={e=>e.stopPropagation()} style={{position:"absolute",bottom:0,left:0,right:0,maxHeight:"86vh",background:`linear-gradient(180deg,${G3},${G2},${BK})`,borderTop:`2px solid ${O}88`,borderRadius:"22px 22px 0 0",overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:`0 -12px 50px ${FR}22`}}>
-        <div style={{height:2,background:`linear-gradient(90deg,transparent,${FR},${FY},${O},${FR},transparent)`,flexShrink:0}}/>
-        <div style={{display:"flex",justifyContent:"center",padding:"7px 0 0",flexShrink:0}}><div style={{width:38,height:4,background:`linear-gradient(90deg,${FR},${FY},${O})`,borderRadius:2,boxShadow:`0 0 8px ${O}`}}/></div>
-        <div style={{padding:"8px 14px 10px",borderBottom:`1px solid ${O}1E`,display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <div style={{width:42,height:42,borderRadius:12,overflow:"hidden",border:`1.5px solid ${O}55`,flexShrink:0,boxShadow:`0 0 12px ${O}44`,background:BK}}>
+    <div onClick={onClose} style={{position:"fixed",inset:0,zIndex:3000,background:"rgba(0,0,0,.85)",backdropFilter:"blur(10px)"}}>
+      <div onClick={e=>e.stopPropagation()} style={{position:"absolute",bottom:0,left:0,right:0,maxHeight:"85vh",background:`linear-gradient(180deg,${G3},${G2},${G1})`,borderTop:`2px solid ${O}66`,borderRadius:"18px 18px 0 0",overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:"0 -8px 30px rgba(0,0,0,.5)"}}>
+        <div style={{height:1,background:`linear-gradient(90deg,transparent,${O}55,transparent)`,flexShrink:0}}/>
+        <div style={{display:"flex",justifyContent:"center",padding:"8px 0 0",flexShrink:0}}><div style={{width:34,height:3,background:`${O}44`,borderRadius:2}}/></div>
+        <div style={{padding:"8px 14px 10px",borderBottom:`1px solid ${O}14`,display:"flex",justifyContent:"space-between",alignItems:"center",flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:9}}>
+            <div style={{width:40,height:40,borderRadius:9,overflow:"hidden",border:`1px solid ${O}33`,flexShrink:0,background:G2}}>
               <img src={CI[cat.img_index]} style={{width:"100%",height:"100%",objectFit:"contain",objectPosition:"center"}} alt=""/>
             </div>
             <div>
-              <div style={{fontSize:6,color:O,letterSpacing:3,fontFamily:"'Cinzel',serif",fontWeight:700}}>MENU</div>
-              <h3 style={{margin:0,fontSize:15,fontWeight:800,color:W,fontFamily:"'Cinzel',serif"}}>{cat.name}</h3>
+              <div style={{fontSize:6,color:CL,letterSpacing:3,fontFamily:"'Cinzel',serif"}}>MENU</div>
+              <h3 style={{margin:0,fontSize:15,fontWeight:700,color:CR,fontFamily:"'Cinzel',serif"}}>{cat.name}</h3>
             </div>
           </div>
-          <button onClick={onClose} style={{background:`${FR}22`,border:`1px solid ${O}44`,color:W,width:26,height:26,borderRadius:"50%",cursor:"pointer",fontSize:11}}>✕</button>
+          <button onClick={onClose} style={{background:`${O}14`,border:`1px solid ${O}33`,color:CR,width:26,height:26,borderRadius:"50%",cursor:"pointer",fontSize:11}}>✕</button>
         </div>
-        <div style={{overflowY:"auto",padding:"8px 12px 28px"}}>
-          {loading?(
-            <div style={{textAlign:"center",padding:30,color:CM,fontFamily:"'Space Grotesk',sans-serif",fontSize:12}}>
-              <div style={{fontSize:22,marginBottom:8,animation:"firePulse 1.5s infinite"}}>🔥</div>Loading...
-            </div>
-          ):hasSubs?(
+        <div style={{overflowY:"auto",padding:"8px 11px 26px"}}>
+          {loading?<div style={{textAlign:"center",padding:"28px",color:CM,fontFamily:"'Cinzel',serif",fontSize:12}}>Loading...</div>:
+          hasSubs?(
             Object.entries(sections).map(([sec,secItems])=>(
-              <div key={sec} style={{marginBottom:18}}>
+              <div key={sec} style={{marginBottom:16}}>
                 {sec&&(
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                    <div style={{flex:1,height:1,background:`linear-gradient(90deg,${FR}55,${O}44,transparent)`}}/>
-                    <span style={{fontSize:8,color:O,fontFamily:"'Cinzel',serif",fontWeight:700,letterSpacing:2,whiteSpace:"nowrap",textShadow:`0 0 8px ${O}`}}>{sec.toUpperCase()}</span>
-                    <div style={{flex:1,height:1,background:`linear-gradient(270deg,${FR}55,${O}44,transparent)`}}/>
+                    <div style={{flex:1,height:1,background:`linear-gradient(90deg,${O}44,transparent)`}}/>
+                    <span style={{fontSize:8,color:CL,fontFamily:"'Cinzel',serif",fontWeight:700,letterSpacing:2,whiteSpace:"nowrap"}}>{sec.toUpperCase()}</span>
+                    <div style={{flex:1,height:1,background:`linear-gradient(270deg,${O}44,transparent)`}}/>
                   </div>
                 )}
                 {secItems.map(item=><ItemRow key={item.id} item={item}/>)}
@@ -391,62 +276,70 @@ function ItemsDrawer({cat,onClose}){
   );
 }
 
-// ═══ CAT CARD ══════════════════════════
+// ═══ CATEGORY CARD ══════════════════════
 function CatCard({cat,onAR,onItems}){
   const[hov,setHov]=useState(false);
   const[tilt,setTilt]=useState({x:0,y:0});
-  const[burst,setBurst]=useState(false);
   const ref=useRef();
-  const mm=(e)=>{if(!ref.current)return;const r=ref.current.getBoundingClientRect();setTilt({x:((e.clientX-r.left)/r.width-.5)*20,y:-((e.clientY-r.top)/r.height-.5)*20});};
+  const mm=(e)=>{if(!ref.current)return;const r=ref.current.getBoundingClientRect();setTilt({x:((e.clientX-r.left)/r.width-.5)*14,y:-((e.clientY-r.top)/r.height-.5)*14});};
   return(
-    <div ref={ref} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>{setHov(false);setTilt({x:0,y:0});}} onMouseMove={mm} onClick={()=>{setBurst(true);setTimeout(()=>setBurst(false),600);}}
-      style={{position:"relative",overflow:"hidden",background:hov?`linear-gradient(145deg,${G3},${G2})`:`linear-gradient(145deg,${G2},${G1})`,border:`1px solid ${hov?FR+"77":O+"28"}`,borderRadius:20,transition:"border-color .25s,box-shadow .25s",transform:`perspective(700px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) ${hov?"translateY(-8px) scale(1.025)":"scale(1)"}`,boxShadow:hov?`0 22px 55px rgba(0,0,0,.95),0 0 35px ${FR}22,0 0 70px ${O}11`:"0 5px 18px rgba(0,0,0,.85)",cursor:"pointer"}}>
-      {burst&&<div style={{position:"absolute",inset:0,zIndex:10,pointerEvents:"none",background:`radial-gradient(circle at 50% 50%,${FR}55,${O}22,transparent 70%)`,animation:"burst .6s ease-out forwards",borderRadius:20}}/>}
-      {hov&&<div style={{position:"absolute",inset:0,borderRadius:20,boxShadow:`inset 0 0 0 1px ${FR}44`,pointerEvents:"none",zIndex:5}}/>}
-      {/* Image - full natural size */}
-      <div style={{position:"relative",width:"100%",background:BK,overflow:"hidden",borderRadius:"20px 20px 0 0"}}>
+    <div ref={ref} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>{setHov(false);setTilt({x:0,y:0});}} onMouseMove={mm}
+      style={{position:"relative",overflow:"hidden",
+        background:hov?`linear-gradient(145deg,${G3},${G2})`:`linear-gradient(145deg,${G2},${G1})`,
+        border:`1px solid ${hov?O+"66":O+"18"}`,
+        borderRadius:16,
+        transition:"border-color .22s, box-shadow .22s",
+        transform:`perspective(600px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) ${hov?"translateY(-5px)":"none"}`,
+        boxShadow:hov?"0 14px 36px rgba(0,0,0,.7)":"0 3px 12px rgba(0,0,0,.5)",
+        cursor:"pointer"}}>
+      {/* Image - no vignette, no glow */}
+      <div style={{position:"relative",width:"100%",background:G1,overflow:"hidden",borderRadius:"15px 15px 0 0"}}>
         <img src={CI[cat.img_index]} alt={cat.name}
-          style={{width:"100%",display:"block",objectFit:"contain",objectPosition:"center",transition:"transform .5s,filter .3s",transform:hov?"scale(1.06)":"scale(1)",filter:hov?"brightness(.95)":"brightness(.9)"}}/>
-        <div style={{position:"absolute",inset:0,background:'none'}}/>
-        
-        <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.09),transparent)",animation:"sweep 3s ease-in-out infinite"}}/>
-        {/* Price badge */}
-        <div style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,.88)",backdropFilter:"blur(8px)",border:`1px solid ${FY}44`,borderRadius:22,padding:"3px 9px"}}>
-          <span style={{fontSize:9,fontWeight:700,color:O,fontFamily:"'Space Grotesk',sans-serif",textShadow:"none"}}>from Rs.{cat.min_price||0}</span>
+          style={{width:"100%",display:"block",objectFit:"contain",objectPosition:"center",transition:"transform .4s",transform:hov?"scale(1.04)":"scale(1)",minHeight:130,maxHeight:185,background:G1}}/>
+        {/* Clean top-only fade */}
+        <div style={{position:"absolute",top:0,left:0,right:0,height:20,background:`linear-gradient(to bottom,${G1}88,transparent)`}}/>
+        {/* Price badge - clean */}
+        <div style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,.8)",border:`1px solid ${O}33`,borderRadius:20,padding:"3px 9px",backdropFilter:"blur(4px)"}}>
+          <span style={{fontSize:9,fontWeight:700,color:O,fontFamily:"'Space Grotesk',sans-serif"}}>from Rs.{cat.min_price||0}</span>
         </div>
+        {/* AR badge */}
         {cat.ar_url&&(
-          <div style={{position:"absolute",top:8,left:8,background:`linear-gradient(135deg,${FR},${O})`,borderRadius:22,padding:"3px 9px",boxShadow:`0 0 12px ${FR}66`}}>
-            <span style={{fontSize:7,fontWeight:800,color:W,letterSpacing:1}}>🔥 AR</span>
+          <div style={{position:"absolute",top:8,left:8,background:O,borderRadius:20,padding:"3px 8px"}}>
+            <span style={{fontSize:7,fontWeight:700,color:W,letterSpacing:1,fontFamily:"'Cinzel',serif"}}>AR 3D</span>
           </div>
         )}
       </div>
       {/* Content */}
       <div style={{padding:"10px 12px 12px"}}>
-        <div style={{fontSize:8,color:`${W}44`,marginBottom:2,fontFamily:"'Space Grotesk',sans-serif"}}>{cat.sub}</div>
-        <h3 style={{margin:"0 0 10px",fontSize:14,fontWeight:700,color:W,fontFamily:"'Cinzel',serif",textShadow:hov?`0 0 14px ${O}44`:"none",transition:"text-shadow .25s"}}>{cat.name}</h3>
+        <div style={{fontSize:8,color:CM,marginBottom:2,fontFamily:"'Cinzel',serif",letterSpacing:1}}>{cat.sub}</div>
+        <h3 style={{margin:"0 0 10px",fontSize:13,fontWeight:700,color:CR,fontFamily:"'Cinzel',serif"}}>{cat.name}</h3>
+        {/* AR button - no glow, clean solid */}
         <button onClick={()=>onAR(cat)}
-          style={{position:"relative",overflow:"hidden",width:"100%",padding:"10px 0",marginBottom:6,background:`linear-gradient(135deg,${FR},${O},${OH})`,border:"none",borderRadius:11,color:W,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Space Grotesk',sans-serif",letterSpacing:.5,boxShadow:hov?`0 0 28px ${FR}99,0 0 55px ${O}33`:`0 0 14px ${FR}44`,transition:"box-shadow .22s",animation:"heartbeat 1.2s ease-in-out infinite"}}>
-          <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent)",animation:"sweep 2s linear infinite",pointerEvents:"none"}}/>
+          style={{width:"100%",padding:"10px 0",marginBottom:6,background:`linear-gradient(135deg,${O},${OH})`,border:"none",borderRadius:10,color:W,fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Cinzel',serif",letterSpacing:.8,transition:"opacity .2s, transform .15s",position:"relative",overflow:"hidden"}}
+          onMouseEnter={e=>e.currentTarget.style.opacity=".88"}
+          onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
+          <div style={{position:"absolute",inset:0,background:"linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent)",animation:"sweep 2.5s linear infinite"}}/>
           <span style={{position:"relative",zIndex:1}}>VIEW IN AR</span>
         </button>
+        {/* Items button */}
         <button onClick={()=>onItems(cat)}
-          style={{width:"100%",padding:"7px 0",background:"rgba(255,255,255,.04)",border:`1px solid rgba(255,255,255,.1)`,borderRadius:10,color:`${W}66`,fontSize:10,fontWeight:600,cursor:"pointer",fontFamily:"'Space Grotesk',sans-serif",transition:"all .18s"}}
-          onMouseEnter={e=>{e.currentTarget.style.background=`${O}18`;e.currentTarget.style.color=W;e.currentTarget.style.borderColor=`${O}44`;}}
-          onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.04)";e.currentTarget.style.color=`${W}66`;e.currentTarget.style.borderColor="rgba(255,255,255,.1)";}}>
-          VIEW ITEMS →
+          style={{width:"100%",padding:"7px 0",background:`${O}0E`,border:`1px solid ${O}22`,borderRadius:9,color:CM,fontSize:10,fontWeight:600,cursor:"pointer",fontFamily:"'Space Grotesk',sans-serif",transition:"all .18s"}}
+          onMouseEnter={e=>{e.currentTarget.style.background=`${O}22`;e.currentTarget.style.borderColor=`${O}44`;e.currentTarget.style.color=CR;}}
+          onMouseLeave={e=>{e.currentTarget.style.background=`${O}0E`;e.currentTarget.style.borderColor=`${O}22`;e.currentTarget.style.color=CM;}}>
+          VIEW ITEMS
         </button>
       </div>
     </div>
   );
 }
 
-// ═══ FOOTER ════════════════════════════
+// ═══ FOOTER ═════════════════════════════
 function Footer(){
   const contacts=[
-    {ic:"🌐",lb:"Website",val:"albasitrestaurant.com",href:"https://albasitrestaurant.com/"},
+    {ic:"◉",lb:"Website",val:"albasitrestaurant.com",href:"https://albasitrestaurant.com/"},
     {ic:Icons.whatsapp,lb:"WhatsApp",val:"0314-5684466",href:"https://wa.me/923145684466"},
-    {ic:"📞",lb:"Phone",val:"021-34500076",href:"tel:02134500076"},
-    {ic:"✉️",lb:"Email",val:"info@albasitresturant.com",href:"mailto:info@albasitresturant.com"},
+    {ic:"◎",lb:"Phone",val:"021-34500076",href:"tel:02134500076"},
+    {ic:"◈",lb:"Email",val:"info@albasitresturant.com",href:"mailto:info@albasitresturant.com"},
   ];
   const socials=[
     {ic:Icons.facebook,href:"https://www.facebook.com/AlBasit.Restaurant"},
@@ -455,34 +348,34 @@ function Footer(){
     {ic:Icons.youtube,href:"https://www.youtube.com/channel/UC-1FlxVk5Ams9JpFoXl-yAQ"},
   ];
   return(
-    <footer style={{background:`linear-gradient(180deg,${G2},${BK})`,borderTop:`1px solid ${FR}22`,position:"relative",zIndex:1}}>
-      <div style={{height:2,background:`linear-gradient(90deg,transparent,${FR},${FY},${O},${FR},transparent)`}}/>
+    <footer style={{background:`linear-gradient(180deg,${G2},${BK})`,borderTop:`1px solid ${O}18`}}>
+      <div style={{height:1,background:`linear-gradient(90deg,transparent,${O}44,transparent)`}}/>
       <div style={{maxWidth:1000,margin:"0 auto",padding:"22px 14px 0"}}>
         <div style={{display:"flex",gap:14,alignItems:"flex-start",marginBottom:16,flexWrap:"wrap"}}>
-          <img src={LOGO} alt="Al Basit" style={{width:56,height:56,borderRadius:"50%",border:`2px solid ${O}66`,objectFit:"cover",boxShadow:`0 0 20px ${FR}44,0 0 40px ${O}22`,flexShrink:0}}/>
+          <img src={LOGO} alt="Al Basit" style={{width:56,height:56,borderRadius:"50%",border:`2px solid ${O}44`,objectFit:"cover",flexShrink:0}}/>
           <div style={{flex:1,minWidth:180}}>
-            <div style={{fontSize:6,color:O,letterSpacing:4,fontWeight:700,marginBottom:1,fontFamily:"'Cinzel',serif"}}>◈ AL BASIT ◈</div>
-            <div style={{fontSize:16,fontWeight:800,color:W,lineHeight:1,fontFamily:"'Cinzel',serif"}}>FAST FOOD BAR BQ</div>
-            <p style={{margin:"5px 0 0",fontSize:11,color:CM,lineHeight:1.6}}>Karachi's favorite destination — BBQ, Karahis, Broast, Burgers, Shawarma & 200+ items crafted with passion.</p>
+            <div style={{fontSize:6,color:CL,letterSpacing:4,fontFamily:"'Cinzel',serif",fontWeight:700,marginBottom:1}}>◈ AL BASIT ◈</div>
+            <div style={{fontSize:16,fontWeight:700,color:CR,fontFamily:"'Cinzel',serif"}}>FAST FOOD BAR BQ</div>
+            <p style={{margin:"5px 0 0",fontSize:11,color:CM,lineHeight:1.6}}>Karachi's favorite destination for authentic flavors — BBQ, Karahis, Broast, Burgers, Shawarma & 200+ items.</p>
           </div>
         </div>
-        <div style={{display:"flex",gap:7,alignItems:"center",marginBottom:12,padding:"10px 12px",background:`${FR}08`,border:`1px solid ${FR}18`,borderRadius:10}}>
-          <span style={{fontSize:14}}>📍</span>
+        <div style={{display:"flex",gap:7,alignItems:"center",marginBottom:12,padding:"10px 12px",background:`${O}08`,border:`1px solid ${O}18`,borderRadius:10}}>
+          <span style={{fontSize:12,flexShrink:0,color:O}}>◍</span>
           <div>
-            <div style={{fontSize:6,color:O,fontWeight:700,letterSpacing:3,marginBottom:1,fontFamily:"'Cinzel',serif"}}>ADDRESS</div>
-            <div style={{fontSize:11,color:W,lineHeight:1.5}}>Main Saudabad Chowrangi, Begum Khursheed Road, Malir, Karachi</div>
+            <div style={{fontSize:6,color:CL,fontFamily:"'Cinzel',serif",fontWeight:700,letterSpacing:3,marginBottom:2}}>ADDRESS</div>
+            <div style={{fontSize:11,color:CR,lineHeight:1.5}}>Main Saudabad Chowrangi, Begum Khursheed Road, Malir, Karachi</div>
           </div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(195px,1fr))",gap:7,marginBottom:14}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:7,marginBottom:14}}>
           {contacts.map((c,i)=>(
             <a key={i} href={c.href} target="_blank" rel="noreferrer"
-              style={{textDecoration:"none",display:"flex",alignItems:"center",gap:8,padding:"8px 11px",background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.07)",borderRadius:9,transition:"all .18s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background=`${FR}15`;e.currentTarget.style.borderColor=`${O}55`;}}
-              onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.03)";e.currentTarget.style.borderColor="rgba(255,255,255,.07)";}}>
+              style={{textDecoration:"none",display:"flex",alignItems:"center",gap:8,padding:"8px 11px",background:`${O}07`,border:`1px solid ${O}15`,borderRadius:9,transition:"all .18s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background=`${O}16`;e.currentTarget.style.borderColor=`${O}40`;}}
+              onMouseLeave={e=>{e.currentTarget.style.background=`${O}07`;e.currentTarget.style.borderColor=`${O}15`;}}>
               <span style={{color:O,flexShrink:0,display:"flex",alignItems:"center"}}>{typeof c.ic==="string"?<span style={{fontSize:16}}>{c.ic}</span>:c.ic}</span>
               <div style={{minWidth:0}}>
-                <div style={{fontSize:6,color:O,fontWeight:700,letterSpacing:2,marginBottom:1}}>{c.lb}</div>
-                <div style={{fontSize:10,color:W,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.val}</div>
+                <div style={{fontSize:6,color:CL,fontFamily:"'Cinzel',serif",fontWeight:700,letterSpacing:2,marginBottom:1}}>{c.lb}</div>
+                <div style={{fontSize:10,color:CR,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.val}</div>
               </div>
             </a>
           ))}
@@ -490,20 +383,19 @@ function Footer(){
         <div style={{display:"flex",gap:9,marginBottom:14,justifyContent:"center"}}>
           {socials.map((s,i)=>(
             <a key={i} href={s.href} target="_blank" rel="noreferrer"
-              style={{textDecoration:"none",width:44,height:44,borderRadius:"50%",background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.1)",display:"flex",alignItems:"center",justifyContent:"center",color:CM,transition:"all .2s"}}
-              onMouseEnter={e=>{e.currentTarget.style.background=`${FR}2E`;e.currentTarget.style.boxShadow=`0 0 16px ${FR}66`;e.currentTarget.style.color=W;e.currentTarget.style.transform="scale(1.15)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.05)";e.currentTarget.style.boxShadow="none";e.currentTarget.style.color=CM;e.currentTarget.style.transform="scale(1)";}}>
+              style={{textDecoration:"none",width:42,height:42,borderRadius:"50%",background:`${O}0E`,border:`1px solid ${O}22`,display:"flex",alignItems:"center",justifyContent:"center",color:CM,transition:"all .2s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background=O;e.currentTarget.style.color=W;e.currentTarget.style.borderColor=O;e.currentTarget.style.transform="scale(1.1)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background=`${O}0E`;e.currentTarget.style.color=CM;e.currentTarget.style.borderColor=`${O}22`;e.currentTarget.style.transform="scale(1)";}}>
               {s.ic}
             </a>
           ))}
         </div>
-        <div style={{height:1,background:`linear-gradient(90deg,transparent,${FR}33,${O}44,${FR}33,transparent)`,marginBottom:10}}/>
+        <div style={{height:1,background:`linear-gradient(90deg,transparent,${O}28,transparent)`,marginBottom:10}}/>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:5,paddingBottom:14}}>
-          <div style={{fontSize:9,color:`${CM}44`}}>© 2025 Al Basit Fast Food Bar BQ · All Rights Reserved</div>
+          <div style={{fontSize:9,color:`${CM}55`,fontFamily:"'Cinzel',serif"}}>© 2025 Al Basit Fast Food Bar BQ</div>
           <div style={{display:"flex",alignItems:"center",gap:4}}>
-            <span style={{fontSize:10}}>🔥</span>
             <span style={{fontSize:9,color:`${CM}44`}}>Powered by </span>
-            <span style={{fontSize:9,color:O,fontWeight:800,letterSpacing:1,fontFamily:"'Cinzel',serif",textShadow:`0 0 6px ${O}`}}>VIVID AR</span>
+            <span style={{fontSize:9,color:O,fontWeight:700,fontFamily:"'Cinzel',serif"}}>VIVID AR</span>
           </div>
         </div>
       </div>
@@ -511,7 +403,7 @@ function Footer(){
   );
 }
 
-// ═══ MAIN APP ══════════════════════════
+// ═══ MAIN APP ═══════════════════════════
 export default function App(){
   const[cats,setCats]=useState([]);
   const[loading,setLoading]=useState(true);
@@ -520,8 +412,6 @@ export default function App(){
   const[search,setSearch]=useState("");
   const[mounted,setMounted]=useState(false);
   const[filter,setFilter]=useState("all");
-  const[showLoader,setShowLoader]=useState(true);
-  const[cartCount,setCartCount]=useState(0);
 
   useEffect(()=>{
     (async()=>{
@@ -548,69 +438,47 @@ export default function App(){
   });
 
   return(
-    <div style={{minHeight:"100vh",background:BK,color:W,position:"relative"}}>
+    <div style={{minHeight:"100vh",background:BK,color:CR}}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
-        *{box-sizing:border-box;}body{background:${BK};}
-        ::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-thumb{background:${FR}55;border-radius:3px;}
-        input::placeholder{color:${CM}44;}button{font-family:'Space Grotesk',sans-serif;}
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        *{box-sizing:border-box;}
+        body{background:${BK};}
+        ::-webkit-scrollbar{width:3px;height:3px;}
+        ::-webkit-scrollbar-thumb{background:${O}44;border-radius:3px;}
+        input::placeholder{color:${CM}44;}
+        button{font-family:'Cinzel',serif;}
         @keyframes sweep{0%{transform:translateX(-100%);}100%{transform:translateX(300%);}}
-        @keyframes firePulse{0%,100%{box-shadow:0 0 14px ${FR}55,0 0 28px ${O}33;}50%{box-shadow:0 0 28px ${FR}AA,0 0 55px ${O}55,0 0 85px ${FR}22;}}
-        @keyframes scanH{0%{top:-2px;}100%{top:calc(100% + 2px);}}
-        @keyframes spinRing{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-        @keyframes fireBase{0%{opacity:.5;transform:scaleX(.8);}100%{opacity:1;transform:scaleX(1.1);}}
-        @keyframes burst{0%{opacity:.9;transform:scale(0);}60%{opacity:.4;}100%{opacity:0;transform:scale(2.2);}}
-        @keyframes logoFire{0%,100%{box-shadow:0 0 10px ${FR}44,0 0 22px ${O}33;}50%{box-shadow:0 0 22px ${FR}88,0 0 44px ${O}66,0 0 65px ${FR}22;}}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}} @keyframes heartbeat{0%,100%{transform:scale(1);box-shadow:0 0 14px ${FR}55,0 0 28px ${O}33;} 14%{transform:scale(1.08);box-shadow:0 0 28px ${FR}AA,0 0 55px ${O}77;} 28%{transform:scale(1);} 42%{transform:scale(1.05);box-shadow:0 0 22px ${FR}88,0 0 44px ${O}55;} 70%{transform:scale(1);}}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
         @keyframes marquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+        @keyframes logoSpin{0%,100%{border-color:${O}55;}50%{border-color:${O}AA;}}
       `}</style>
 
-      {showLoader&&<LoadingScreen onDone={()=>setShowLoader(false)}/>}
-      <FireCanvas/>
-
-      {/* AR Tagline Banner */}
-      <div style={{background:`linear-gradient(90deg,${BK},${G3},${BK})`,borderBottom:`1px solid ${FR}33`,padding:"8px 0",overflow:"hidden",position:"relative",zIndex:2}}>
-        <div style={{display:"flex",animation:"marquee 18s linear infinite",whiteSpace:"nowrap",width:"200%"}}>
-          {[...Array(2)].map((_,k)=>(
-            <div key={k} style={{display:"flex",gap:0}}>
-              {["🔥 Experience Food in Augmented Reality","✨ Scan. See. Order in 3D","🍽️ Point Your Camera — Watch Food Come to Life","⚡ Al Basit AR Menu — Pakistan's First","🌟 Real Size 3D Food Models at Your Table"].map((t,i)=>(
-                <span key={i} style={{display:"inline-flex",alignItems:"center",padding:"0 28px",fontSize:11,fontWeight:600,fontFamily:"'Cinzel',serif",color:i%2===0?FY:W,letterSpacing:1,textShadow:i%2===0?`0 0 10px ${FY}55`:"none"}}>
-                  {t}
-                  <span style={{marginLeft:28,color:FR,fontSize:10}}>◆</span>
-                </span>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Sticky Header */}
-      <div style={{position:"sticky",top:0,zIndex:500,background:`linear-gradient(180deg,${BK}FA,${G1}F0)`,backdropFilter:"blur(24px)",borderBottom:`1px solid ${FR}22`}}>
-        <div style={{height:2,background:`linear-gradient(90deg,transparent,${FR}88,${FY},${O},${FR}88,transparent)`,animation:"fireBase 2s ease-in-out infinite alternate"}}/>
+      <div style={{position:"sticky",top:0,zIndex:500,background:`linear-gradient(180deg,${BK}FA,${G1}F0)`,backdropFilter:"blur(20px)",borderBottom:`1px solid ${O}18`}}>
+        <div style={{height:1,background:`linear-gradient(90deg,transparent,${O}44,transparent)`}}/>
         <div style={{maxWidth:1000,margin:"0 auto",padding:"10px 14px 8px"}}>
-          {/* Logo + title */}
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
-            <img src={LOGO} alt="Al Basit" style={{width:46,height:46,borderRadius:"50%",border:`2px solid ${FR}77`,objectFit:"cover",animation:"logoFire 2.5s ease-in-out infinite",flexShrink:0}}/>
+            <img src={LOGO} alt="Al Basit" style={{width:44,height:44,borderRadius:"50%",border:`2px solid ${O}55`,objectFit:"cover",flexShrink:0,animation:"logoSpin 3s ease-in-out infinite"}}/>
             <div style={{flex:1}}>
-              <div style={{fontSize:6,color:O,fontWeight:700,letterSpacing:4,marginBottom:1,fontFamily:"'Cinzel',serif",textShadow:"none"}}>🔥 AR MENU SYSTEM 🔥</div>
-              <div style={{fontSize:17,fontWeight:900,color:W,lineHeight:1,fontFamily:"'Cinzel',serif"}}>AL BASIT <span style={{fontSize:9,color:O,fontWeight:600,letterSpacing:2,marginLeft:5}}>FAST FOOD BAR BQ</span></div>
+              <div style={{fontSize:6,color:CL,fontWeight:700,letterSpacing:4,fontFamily:"'Cinzel',serif",marginBottom:1}}>◈ AR MENU SYSTEM ◈</div>
+              <div style={{fontSize:17,fontWeight:700,color:CR,fontFamily:"'Cinzel',serif",lineHeight:1}}>AL BASIT <span style={{fontSize:9,color:O,fontWeight:600,letterSpacing:2,marginLeft:5}}>FAST FOOD BAR BQ</span></div>
             </div>
           </div>
           {/* Search */}
           <div style={{position:"relative",marginBottom:8}}>
-            <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:12,color:FR}}>🔥</span>
+            <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:10,color:O}}>◈</span>
             <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search menu..."
-              style={{width:"100%",padding:"8px 12px 8px 30px",background:`${FR}0A`,border:`1px solid ${search?FR+"55":FR+"1E"}`,borderRadius:10,color:W,fontSize:11,fontFamily:"'Space Grotesk',sans-serif",outline:"none",transition:"border-color .2s"}}/>
+              style={{width:"100%",padding:"8px 12px 8px 28px",background:`${O}08`,border:`1px solid ${search?O+"44":O+"18"}`,borderRadius:9,color:CR,fontSize:11,fontFamily:"'Space Grotesk',sans-serif",outline:"none",transition:"border-color .2s"}}/>
           </div>
-          {/* All 22 category filter pills */}
-          <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:4}}>
+          {/* All 22 filter pills */}
+          <div style={{display:"flex",gap:5,overflowX:"auto",paddingBottom:3}}>
             <button onClick={()=>setFilter("all")}
-              style={{padding:"5px 14px",borderRadius:20,fontSize:10,fontWeight:700,cursor:"pointer",fontFamily:"'Space Grotesk',sans-serif",whiteSpace:"nowrap",flexShrink:0,background:filter==="all"?`linear-gradient(135deg,${FR},${O},${OH})`:`${FR}10`,border:`1px solid ${filter==="all"?FR+"88":FR+"22"}`,color:filter==="all"?W:CM,boxShadow:filter==="all"?`0 0 12px ${FR}55`:"none",transition:"all .18s"}}>
-              All 🔥
+              style={{padding:"5px 14px",borderRadius:20,fontSize:10,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,background:filter==="all"?O:`${O}0E`,border:`1px solid ${filter==="all"?O:O+"22"}`,color:filter==="all"?W:CM,transition:"all .18s",fontFamily:"'Cinzel',serif"}}>
+              All
             </button>
-            {ALL_CATS_NAMES.map(n=>(
+            {ALL_CATS.map(n=>(
               <button key={n} onClick={()=>setFilter(n===filter?"all":n)}
-                style={{padding:"5px 12px",borderRadius:20,fontSize:10,fontWeight:600,cursor:"pointer",fontFamily:"'Space Grotesk',sans-serif",whiteSpace:"nowrap",flexShrink:0,background:filter===n?`linear-gradient(135deg,${FR},${O})`:`${FR}0A`,border:`1px solid ${filter===n?FR+"77":FR+"1A"}`,color:filter===n?W:CM,boxShadow:filter===n?`0 0 10px ${FR}44`:"none",transition:"all .18s"}}>
+                style={{padding:"5px 11px",borderRadius:20,fontSize:10,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,background:filter===n?O:`${O}0A`,border:`1px solid ${filter===n?O:O+"18"}`,color:filter===n?W:CM,transition:"all .18s",fontFamily:"'Cinzel',serif"}}>
                 {n}
               </button>
             ))}
@@ -618,29 +486,44 @@ export default function App(){
         </div>
       </div>
 
+      {/* AR Tagline marquee - clean */}
+      <div style={{background:`linear-gradient(90deg,${G3},${G2},${G3})`,borderBottom:`1px solid ${O}18`,padding:"7px 0",overflow:"hidden"}}>
+        <div style={{display:"flex",animation:"marquee 22s linear infinite",whiteSpace:"nowrap",width:"200%"}}>
+          {[...Array(2)].map((_,k)=>(
+            <div key={k} style={{display:"flex"}}>
+              {["Experience Food in Augmented Reality","Scan — See — Order in 3D","Point Camera — Watch Food Come to Life","Al Basit AR Menu","Real Size 3D Food at Your Table"].map((t,i)=>(
+                <span key={i} style={{display:"inline-flex",alignItems:"center",padding:"0 26px",fontSize:10,fontWeight:600,fontFamily:"'Cinzel',serif",color:i%2===0?CR:CL,letterSpacing:1}}>
+                  {t}<span style={{marginLeft:26,color:O,fontSize:8}}>◆</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Hero Banner */}
       {!loading&&!search&&filter==="all"&&<HeroBanner/>}
 
-      {/* Section divider */}
-      <div style={{maxWidth:1000,margin:"14px auto 10px",padding:"0 14px",display:"flex",alignItems:"center",gap:10,position:"relative",zIndex:1}}>
-        <div style={{flex:1,height:1,background:`linear-gradient(90deg,${FR}55,${O}44,transparent)`}}/>
-        <span style={{fontSize:7,color:O,fontFamily:"'Cinzel',serif",fontWeight:700,letterSpacing:3,whiteSpace:"nowrap",textShadow:`0 0 8px ${O}`}}>
+      {/* Section title */}
+      <div style={{maxWidth:1000,margin:"14px auto 10px",padding:"0 14px",display:"flex",alignItems:"center",gap:10}}>
+        <div style={{flex:1,height:1,background:`linear-gradient(90deg,${O}44,transparent)`}}/>
+        <span style={{fontSize:7,color:CL,fontFamily:"'Cinzel',serif",fontWeight:700,letterSpacing:3,whiteSpace:"nowrap"}}>
           {search?`${filtered.length} RESULTS`:filter!=="all"?filter.toUpperCase():"SELECT CATEGORY"}
         </span>
-        <div style={{flex:1,height:1,background:`linear-gradient(270deg,${FR}55,${O}44,transparent)`}}/>
+        <div style={{flex:1,height:1,background:`linear-gradient(270deg,${O}44,transparent)`}}/>
       </div>
 
       {/* Grid */}
-      <div style={{maxWidth:1000,margin:"0 auto",padding:"0 14px 40px",position:"relative",zIndex:1}}>
+      <div style={{maxWidth:1000,margin:"0 auto",padding:"0 14px 36px"}}>
         {loading?(
           <div style={{textAlign:"center",padding:"70px 0",color:CM,fontFamily:"'Cinzel',serif"}}>
-            <div style={{fontSize:36,marginBottom:10,animation:"firePulse 1.2s infinite"}}>🔥</div>
+            <div style={{fontSize:14,marginBottom:10}}>◈</div>
             <div style={{fontSize:13}}>Loading menu...</div>
           </div>
         ):(
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:14}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:13}}>
             {filtered.map((cat,i)=>(
-              <div key={cat.id} style={{opacity:mounted?1:0,transform:mounted?"none":"translateY(24px)",transition:`opacity .4s ${i*.04}s,transform .4s ${i*.04}s`}}>
+              <div key={cat.id} style={{opacity:mounted?1:0,transform:mounted?"none":"translateY(18px)",transition:`opacity .38s ${i*.04}s,transform .38s ${i*.04}s`}}>
                 <CatCard cat={cat} onAR={setArCat} onItems={setItemsCat}/>
               </div>
             ))}
@@ -648,15 +531,13 @@ export default function App(){
         )}
         {!loading&&filtered.length===0&&(
           <div style={{textAlign:"center",padding:"60px 0",color:CM}}>
-            <div style={{fontSize:32,marginBottom:8,opacity:.4}}>🔥</div>
+            <div style={{fontSize:14,marginBottom:8}}>◈</div>
             <p style={{fontFamily:"'Cinzel',serif",fontSize:12}}>No category found</p>
           </div>
         )}
       </div>
 
       <Footer/>
-      <FloatingCart count={cartCount} onClick={()=>alert("Cart feature coming soon!")}/>
-      <BackToTop/>
       {arCat&&<ARModal cat={arCat} onClose={()=>setArCat(null)}/>}
       {itemsCat&&<ItemsDrawer cat={itemsCat} onClose={()=>setItemsCat(null)}/>}
     </div>
